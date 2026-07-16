@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de Badge CONFERENCE DES JEUNES COUFFO 2026</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "DM Sans", "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      background: linear-gradient(135deg, #fff0f0 0%, #fcebeb 100%);
+      color: #1f2937;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.1fr) minmax(300px, 0.9fr);
+      gap: 24px;
+      align-items: start;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .preview-card,
+    .editor-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    h1,
+    h2 {
+      margin: 0 0 16px;
+      font-size: 1.4rem;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      text-align: left;
+    }
+
+    .badge-container {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 4 / 5;
+      margin: 0 auto 12px;
+      border-radius: 16px;
+      background: #f3eee0;
+      overflow: hidden;
+      touch-action: none;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+
+    .badge-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .badge-photo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      object-fit: cover;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    .badge-photo.hidden {
+      display: none;
+    }
+
+    #text-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .text-item,
+    .selection-handle {
+      pointer-events: auto;
+    }
+
+    .text-item {
+      position: absolute;
+      display: block;
+      color: #ffffff;
+      text-align: left;
+      white-space: nowrap;
+      transform-origin: center center;
+      user-select: none;
+      cursor: grab;
+      padding: 2px 6px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      line-height: 1.1;
+    }
+
+    .text-item.is-active {
+      outline: 2px dashed rgba(255, 255, 255, 0.93);
+      outline-offset: 6px;
+    }
+
+    .selection-box {
+      position: absolute;
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+    }
+
+    .selection-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #9e1c15;
+      pointer-events: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+    }
+
+    .handle-resize {
+      right: -6px;
+      bottom: -6px;
+      cursor: nwse-resize;
+    }
+
+    .handle-rotate {
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: grab;
+    }
+
+    .badge-hint {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .editor-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group-inline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    select,
+    input[type="color"],
+    input[type="range"] {
+      width: 100%;
+    }
+
+    input[type="text"],
+    select {
+      border: 1px solid #d9d2c2;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+    }
+
+    input[type="color"] {
+      border: none;
+      background: transparent;
+      padding: 0;
+      min-height: 38px;
+    }
+
+    .text-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .text-tab {
+      border: 1px solid #d9d2c2;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #f7f3e9;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    .text-tab.is-active {
+      background: #9e1c15;
+      color: #fff;
+      border-color: #9e1c15;
+    }
+
+    .upload-btn,
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .upload-btn:hover,
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .upload-btn {
+      background: #9e1c15;
+      color: #fff;
+      text-align: center;
+      display: inline-block;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    #zoom-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    #zoom-wrapper.hidden {
+      display: none;
+    }
+
+    #downloadBtn {
+      margin-top: 6px;
+      background: #d4a017;
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(212, 160, 23, 0.22);
+    }
+
+    @media (max-width: 960px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+
+      .preview-card,
+      .editor-card {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app-shell">
+    <section class="preview-card">
+      <h1>Générateur de Badge Djotto Xwé</h1>
+
+      <div class="badge-container" id="badge-area">
+        <img id="user-photo" class="badge-photo hidden" alt="Photo du participant" draggable="false" />
+        <img id="frame-img" class="badge-frame" src="./badge_cjc2026.png" alt="Cadre du badge" />
+        <div id="text-layer"></div>
+      </div>
+
+      <div class="badge-hint">Sélectionnez un texte, puis déplacez, redimensionnez ou faites-le pivoter.</div>
+    </section>
+
+    <section class="editor-card">
+      <h2>Édition du badge</h2>
+
+      <div class="field-group">
+        <label class="upload-btn" for="photo-input">Choisir une photo</label>
+        <input type="file" id="photo-input" accept="image/*" />
+      </div>
+
+      <div id="zoom-wrapper" class="hidden">
+        <label for="zoom-range">Zoom de la photo</label>
+        <input type="range" id="zoom-range" min="50" max="200" value="100" step="1" />
+      </div>
+
+      <div class="field-group">
+        <label>Texte à modifier</label>
+        <div class="text-tabs">
+          <button class="text-tab is-active" type="button" data-text-id="name">Nom</button>
+          <button class="text-tab" type="button" data-text-id="number">Numéro</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="name-input">Nom</label>
+        <input type="text" id="name-input" placeholder="Votre nom" value="Nom du participant" />
+      </div>
+
+      <div class="field-group">
+        <label for="number-input">Numéro</label>
+        <input type="text" id="number-input" placeholder="Participant N°1" value="Participant N°1" />
+      </div>
+
+      <div class="field-group">
+        <label for="font-size-input">Taille du texte (px)</label>
+        <input type="number" id="font-size-input" min="8" max="90" step="1" value="14" />
+      </div>
+
+      <div class="field-group">
+        <label for="font-weight-select">Épaisseur</label>
+        <select id="font-weight-select">
+          <option value="400">Normal</option>
+          <option value="500">Medium</option>
+          <option value="700" selected>Bold</option>
+          <option value="800">Extra bold</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="font-family-select">Police</label>
+        <select id="font-family-select">
+          <option value="DM Sans" selected>DM Sans</option>
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Times New Roman">Times New Roman</option>
+        </select>
+      </div>
+
+      <div class="field-group field-group-inline">
+        <label for="text-color">Couleur du texte</label>
+        <input type="color" id="text-color" value="#ffffff" />
+      </div>
+
+      <button id="downloadBtn" type="button" onclick="downloadBadge()">Télécharger le badge</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
