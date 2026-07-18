@@ -304,10 +304,10 @@
       <div class="badge-container" id="badge-area">
         <img id="user-photo" class="badge-photo hidden" alt="Photo du participant" draggable="false" />
         <img id="frame-img" class="badge-frame" src="./badge_cjc2026.png" alt="Cadre du badge" />
-        <div id="text-layer"></div>
+
       </div>
 
-      <div class="badge-hint">Cliquez sur "Choisir une photo", entrez vos informations et validez.</div>
+      <div class="badge-hint">Cliquez sur "Choisir une photo", ajustez-la, puis téléchargez.</div>
     </section>
 
     <section class="editor-card">
@@ -323,53 +323,7 @@
         <input type="range" id="zoom-range" min="50" max="200" value="100" step="1" />
       </div>
 
-      <div class="field-group">
-        <label>Texte à modifier</label>
-        <div class="text-tabs">
-          <button class="text-tab is-active" type="button" data-text-id="name">Nom</button>
-          <button class="text-tab" type="button" data-text-id="number">Numéro</button>
-        </div>
-      </div>
 
-      <div class="field-group">
-        <label for="name-input">Nom</label>
-        <input type="text" id="name-input" placeholder="Votre nom" value="Nom du participant" />
-      </div>
-
-      <div class="field-group">
-        <label for="number-input">Numéro</label>
-        <input type="text" id="number-input" placeholder="Participant N°1" value="Participant N°1" />
-      </div>
-
-      <div class="field-group">
-        <label for="font-size-input">Taille du texte (px)</label>
-        <input type="number" id="font-size-input" min="8" max="90" step="1" value="14" />
-      </div>
-
-      <div class="field-group">
-        <label for="font-weight-select">Épaisseur</label>
-        <select id="font-weight-select">
-          <option value="400">Normal</option>
-          <option value="500">Medium</option>
-          <option value="700" selected>Bold</option>
-          <option value="800">Extra bold</option>
-        </select>
-      </div>
-
-      <div class="field-group">
-        <label for="font-family-select">Police</label>
-        <select id="font-family-select">
-          <option value="DM Sans" selected>DM Sans</option>
-          <option value="Arial">Arial</option>
-          <option value="Georgia">Georgia</option>
-          <option value="Times New Roman">Times New Roman</option>
-        </select>
-      </div>
-
-      <div class="field-group field-group-inline">
-        <label for="text-color">Couleur du texte</label>
-        <input type="color" id="text-color" value="#ffffff" />
-      </div>
 
       <button id="downloadBtn" type="button" onclick="downloadBadge()">Télécharger le badge</button>
     </section>

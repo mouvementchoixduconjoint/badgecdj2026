@@ -1,27 +1,17 @@
 /**
  * BadgeEvent Djotto Xwé - Application Logic
- * Manages photo upload, text editing, badge preview, canvas rendering, and download
+ * Manages photo upload, badge preview, canvas rendering, and download
  */
 
 /* =============================================
    DOM ELEMENTS
    ============================================= */
 const badgeArea = document.getElementById('badge-area');
-const textLayer = document.getElementById('text-layer');
 const userPhoto = document.getElementById('user-photo');
 const photoInput = document.getElementById('photo-input');
 const zoomRange = document.getElementById('zoom-range');
 const downloadBtn = document.getElementById('downloadBtn');
 const frameImg = document.getElementById('frame-img');
-
-const nameInput = document.getElementById('name-input');
-const numberInput = document.getElementById('number-input');
-const fontSizeInput = document.getElementById('font-size-input');
-const fontWeightSelect = document.getElementById('font-weight-select');
-const fontFamilySelect = document.getElementById('font-family-select');
-const textColorInput = document.getElementById('text-color');
-
-const textTabs = Array.from(document.querySelectorAll('.text-tab'));
 const badgeHint = document.querySelector('.badge-hint');
 
 /* =============================================
@@ -30,33 +20,8 @@ const badgeHint = document.querySelector('.badge-hint');
 let offsetX = 0;
 let offsetY = 0;
 let scale = 1;
-let activeTextId = 'name';
-let dragState = null;
 let photoGesture = null;
 const photoPointers = new Map();
-
-const textObjects = {
-  name: {
-    id: 'name',
-    text: 'Nom du participant',
-    xPercent: 49.29,
-    yPercent: 62.98,
-    fontSize: 14,
-    fontWeight: 700,
-    fontFamily: 'DM Sans',
-    color: '#9e1c15'
-  },
-  number: {
-    id: 'number',
-    text: 'Participant N°1',
-    xPercent: 49.76,
-    yPercent: 17.4,
-    fontSize: 14,
-    fontWeight: 700,
-    fontFamily: 'DM Sans',
-    color: '#ffffff'
-  }
-};
 
 /* =============================================
    UTILITY FUNCTIONS
@@ -122,141 +87,6 @@ function loadImage(img) {
 }
 
 /* =============================================
-   TEXT MANAGEMENT
-   ============================================= */
-
-/**
- * Set default positions for text objects
- */
-function setTextDefaults() {
-  textObjects.number.x = 209;
-  textObjects.number.y = 91.3333;
-  textObjects.name.x = 207;
-  textObjects.name.y = 330.667;
-}
-
-/**
- * Update input fields based on active text
- */
-function updateActiveTextInputs() {
-  const obj = textObjects[activeTextId];
-  if (!obj) return;
-  nameInput.value = textObjects.name.text;
-  numberInput.value = textObjects.number.text;
-  fontSizeInput.value = obj.fontSize;
-  fontWeightSelect.value = obj.fontWeight;
-  fontFamilySelect.value = obj.fontFamily;
-  textColorInput.value = obj.color;
-}
-
-/**
- * Select text for editing
- */
-function selectText(id) {
-  activeTextId = id;
-  textTabs.forEach((tab) => {
-    tab.classList.toggle('is-active', tab.dataset.textId === id);
-  });
-  updateActiveTextInputs();
-  renderTexts();
-}
-
-/**
- * Render all text elements on the badge
- */
-function renderTexts() {
-  const rect = badgeArea.getBoundingClientRect();
-  if (!rect.width) return;
-
-  textLayer.innerHTML = '';
-
-  Object.values(textObjects).forEach((obj) => {
-    // Calculer les positions en pixels basées sur les pourcentages
-    const x = (obj.xPercent / 100) * rect.width;
-    const y = (obj.yPercent / 100) * rect.height;
-    
-    const element = document.createElement('div');
-    element.className = `text-item${obj.id === activeTextId ? ' is-active' : ''}`;
-    element.dataset.id = obj.id;
-    element.textContent = obj.text;
-    element.style.left = `${x}px`;
-    element.style.top = `${y}px`;
-    element.style.fontSize = `${obj.fontSize}px`;
-    element.style.fontWeight = obj.fontWeight;
-    element.style.fontFamily = obj.fontFamily;
-    element.style.color = obj.color;
-    element.style.maxWidth = `${Math.min(rect.width * 0.8, 260)}px`;
-    element.style.transform = `translate(-50%, -50%)`;
-    textLayer.appendChild(element);
-
-    element.addEventListener('click', () => {
-      selectText(obj.id);
-    });
-  });
-
-  const activeObj = textObjects[activeTextId];
-  if (!activeObj) return;
-}
-
-/* =============================================
-   DRAG & DROP INTERACTIONS
-   ============================================= */
-
-/**
- * Start moving text element
- */
-function startMove(event, id) {
-  return;
-}
-
-/**
- * Start resizing text element
- */
-function startResize(event, id) {
-  return;
-}
-
-/**
- * Start rotating text element
- */
-function startRotate(event, id) {
-  return;
-}
-
-/**
- * Update drag operation based on mouse movement
- */
-function updateDrag(event) {
-  if (!dragState) return;
-  const rect = badgeArea.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  const obj = textObjects[dragState.id];
-
-  if (dragState.mode === 'move') {
-    const element = textLayer.querySelector(`[data-id="${obj.id}"]`);
-    const width = element ? element.offsetWidth || 80 : 80;
-    const height = element ? element.offsetHeight || 24 : 24;
-    const padding = 16;
-    obj.x = clamp(x, padding + width / 2, rect.width - padding - width / 2);
-    obj.y = clamp(y, padding + height / 2, rect.height - padding - height / 2);
-  } else if (dragState.mode === 'resize') {
-    const delta = (event.clientY - dragState.startY) * 0.12 + (event.clientX - dragState.startX) * 0.08;
-    obj.fontSize = clamp(dragState.startFontSize + delta, 8, 90);
-    fontSizeInput.value = obj.fontSize;
-  }
-
-  renderTexts();
-}
-
-/**
- * Finish drag operation
- */
-function finishDrag() {
-  dragState = null;
-}
-
-/* =============================================
    BADGE DOWNLOAD
    ============================================= */
 
@@ -290,22 +120,6 @@ function downloadBadge() {
 
   // Frame overlay
   ctx.drawImage(frameImg, 0, 0, rect.width, rect.height);
-
-  // Text elements
-  Object.values(textObjects).forEach((obj) => {
-    const rect = badgeArea.getBoundingClientRect();
-    const x = (obj.xPercent / 100) * rect.width;
-    const y = (obj.yPercent / 100) * rect.height;
-    
-    ctx.save();
-    ctx.fillStyle = obj.color;
-    ctx.font = `${obj.fontWeight} ${obj.fontSize}px ${obj.fontFamily}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.translate(x, y);
-    ctx.fillText(obj.text, 0, 0);
-    ctx.restore();
-  });
 
   try {
     if (navigator.msSaveOrOpenBlob) {
@@ -373,56 +187,10 @@ zoomRange.addEventListener('input', () => {
 });
 
 /* =============================================
-   EVENT LISTENERS - Text Input
-   ============================================= */
-
-nameInput.addEventListener('input', () => {
-  textObjects.name.text = nameInput.value.trim() || 'Nom du participant';
-  renderTexts();
-});
-
-numberInput.addEventListener('input', () => {
-  textObjects.number.text = numberInput.value.trim() || 'Participant N°1';
-  renderTexts();
-});
-
-fontSizeInput.addEventListener('input', () => {
-  const value = Number(fontSizeInput.value);
-  textObjects[activeTextId].fontSize = Number.isFinite(value) ? clamp(value, 8, 90) : 14;
-  fontSizeInput.value = textObjects[activeTextId].fontSize;
-  renderTexts();
-});
-
-fontWeightSelect.addEventListener('change', () => {
-  textObjects[activeTextId].fontWeight = fontWeightSelect.value;
-  renderTexts();
-});
-
-fontFamilySelect.addEventListener('change', () => {
-  textObjects[activeTextId].fontFamily = fontFamilySelect.value;
-  renderTexts();
-});
-
-textColorInput.addEventListener('input', () => {
-  textObjects[activeTextId].color = textColorInput.value;
-  renderTexts();
-});
-
-/* =============================================
-   EVENT LISTENERS - Text Tabs
-   ============================================= */
-
-textTabs.forEach((tab) => {
-  tab.addEventListener('click', () => selectText(tab.dataset.textId));
-});
-
-/* =============================================
    EVENT LISTENERS - Badge Area (Photo Gestures)
    ============================================= */
 
 badgeArea.addEventListener('pointerdown', (event) => {
-  if (dragState) return;
-  if (event.target.closest('.text-item, .selection-handle')) return;
   if (!userPhoto.src || userPhoto.classList.contains('hidden')) return;
 
   const point = { x: event.clientX, y: event.clientY };
@@ -453,11 +221,6 @@ badgeArea.addEventListener('pointerdown', (event) => {
 });
 
 badgeArea.addEventListener('pointermove', (event) => {
-  if (dragState) {
-    updateDrag(event);
-    return;
-  }
-
   if (!photoGesture || !photoPointers.has(event.pointerId)) return;
   photoPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
@@ -497,10 +260,6 @@ badgeArea.addEventListener('pointerup', (event) => {
       startOffsetY: offsetY
     };
   }
-
-  if (!photoGesture) {
-    finishDrag();
-  }
 });
 
 badgeArea.addEventListener('pointercancel', (event) => {
@@ -508,28 +267,12 @@ badgeArea.addEventListener('pointercancel', (event) => {
   if (photoPointers.size === 0) {
     photoGesture = null;
   }
-  finishDrag();
 });
 
 /* =============================================
-   EVENT LISTENERS - Download & Resize
+   EVENT LISTENERS - Download
    ============================================= */
 
 downloadBtn.addEventListener('click', () => {
   downloadBadge();
-});
-
-window.addEventListener('resize', () => {
-  setTextDefaults();
-  renderTexts();
-});
-
-/* =============================================
-   INITIALIZATION
-   ============================================= */
-
-window.addEventListener('load', () => {
-  setTextDefaults();
-  renderTexts();
-  updateActiveTextInputs();
 });
