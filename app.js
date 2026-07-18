@@ -57,6 +57,7 @@ function getMidpoint(a, b) {
  */
 function applyPhotoTransform() {
   userPhoto.style.width = `${scale * 100}%`;
+  userPhoto.style.height = 'auto';
   userPhoto.style.left = `${offsetX}px`;
   userPhoto.style.top = `${offsetY}px`;
 }
@@ -125,7 +126,7 @@ function downloadBadge() {
     if (navigator.msSaveOrOpenBlob) {
       canvas.toBlob((blob) => {
         if (blob) {
-          navigator.msSaveOrOpenBlob(blob, 'badge-djotto-xwe.jpg');
+          navigator.msSaveOrOpenBlob(blob, 'MonBadgeCDJ2026MCC.jpg');
         }
       }, 'image/jpeg', 0.95);
       return;
@@ -134,7 +135,7 @@ function downloadBadge() {
     const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = 'badge-djotto-xwe.jpg';
+    link.download = 'MonBadgeCDJ2026MCC.jpg';
     link.style.display = 'none';
     document.body.appendChild(link);
 
@@ -161,19 +162,26 @@ function downloadBadge() {
    ============================================= */
 
 photoInput.addEventListener('change', async (event) => {
-  const [file] = event.target.files || [];
-  if (!file) return;
+  try {
+    const [file] = event.target.files || [];
+    if (!file) return;
 
-  const objectUrl = URL.createObjectURL(file);
-  userPhoto.src = objectUrl;
-  userPhoto.classList.remove('hidden');
-  document.getElementById('zoom-wrapper').classList.remove('hidden');
+    const objectUrl = URL.createObjectURL(file);
+    userPhoto.src = objectUrl;
+    userPhoto.classList.remove('hidden');
+    userPhoto.style.display = 'block'; // Force display
+    
+    const zoomWrapper = document.getElementById('zoom-wrapper');
+    if (zoomWrapper) zoomWrapper.classList.remove('hidden');
 
-  await loadImage(userPhoto);
-  resetPhotoPosition();
+    await loadImage(userPhoto);
+    resetPhotoPosition();
 
-  if (downloadBtn) {
-    downloadBtn.disabled = false;
+    if (downloadBtn) {
+      downloadBtn.disabled = false;
+    }
+  } catch (err) {
+    console.error('Erreur photo:', err);
   }
 });
 
